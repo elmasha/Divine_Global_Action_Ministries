@@ -60,7 +60,7 @@
     <div class="container d-flex">
 
       <div class="logo mr-auto">
-        <h1 class="text-light"><a href="">Divine Global Action Ministries</a></h1>
+        <h1 class="text-light" id="#h1Header"><a href="">Divine Global Action Ministries</a></h1>
         <!-- Uncomment below if you prefer to use an image logo -->
         <!-- <a href="index.html"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
       </div>
@@ -92,33 +92,44 @@
 
     <!-- ======= Contact Section ======= -->
     <section id="contact" class="contact">
-      <div class="container">
+      <div class="container php-email-form">
 
-       
-        <div  class="row mt-5 justify-content-center" data-aos="fade-up">
-          <div id="contact1" class="col-lg-7 ">
-            <form action="forms/contact.php" method="post" role="form" class="php-email-form">
+        
+        <div class="text-center"><a href=""></a><button type="submit" onclick="window.location ='photos.html' ">Add Photo</button></a>    <button type="submit" onclick="window.location ='eventUpload.html' ">Add Events</button>    <button type="submit" onclick="window.location ='testimonialsform.html' ">Add Testimony</button></div>
+          <br>
+          <br>
+          <img id="myimg"><label id="upProgress"></label>
+          <br>
+          <br>
+
+          <div class="col-lg-10">
+
+            <form action="forms/contact.php" method="post" role="form" >
               <div class="form-row">
-                <div class="col-md-7 form-group">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email" />
+
+                <div class="col-md-6 form-group">
+                  <input type="text" name="name" class="form-control" id="name" placeholder="Title" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
                   <div class="validate"></div>
                 </div>
+              
+                <div class="col-md-6 form-group">
+                  <input type="text" name="name" class="form-control" id="description" placeholder="Description" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                  <div class="validate"></div>
+                </div>
+               
               </div>
-              <div class="col-md-8 form-group">
-                <input type="password" class="form-control" name="subject" id="password" placeholder="Password" data-rule="minlen:4" data-msg="Please enter at least 8 chars of subject" />
-                <div class="validate"></div>
-              </div>
+          
               <div class="mb-3">
                 <div class="loading">Loading</div>
                 <div class="error-message"></div>
                 <div class="sent-message">Your message has been sent. Thank you!</div>
               </div>
-              <div class="text-center"><button type="submit" onclick="Login()">Login</button></div>
             </form>
           </div>
+          <button type="submit" id="select">Select Image</button><br><br>
 
-        </div>      
-
+          <button type="submit" id="Upload">Upload details</button><br>
+          
       </div>
     </section><!-- End Contact Section -->
 
@@ -146,7 +157,13 @@
   <!-- The core Firebase JS SDK is always required and must be listed first -->
 <script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/ui/8.2.3/firebase-ui-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-auth.js"></script>
+
 <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/8.2.3/firebase-ui-auth.css" />
+<script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.3/firebase-storage.js"></script>
+
 
 <!-- TODO: Add SDKs for Firebase products that you want to use
      https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -154,22 +171,112 @@
 
 <script>
   // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   var firebaseConfig = {
-    apiKey: "AIzaSyCVo-ESdApFr7-K7PvEeX7jAusfZcQSKW4",
-    authDomain: "divine-544aa.firebaseapp.com",
-    projectId: "divine-544aa",
-    storageBucket: "divine-544aa.appspot.com",
-    messagingSenderId: "122662591286",
-    appId: "1:122662591286:web:ef144c1ef808649d51f197",
-    measurementId: "G-LKWNDX2ZSS"
+    apiKey: "AIzaSyAEjPiHpNvmx59PFIBpd_FW9E5wazRQhl4",
+    authDomain: "divineglobal-f9a48.firebaseapp.com",
+    projectId: "divineglobal-f9a48",
+    storageBucket: "divineglobal-f9a48.appspot.com",
+    messagingSenderId: "701807318412",
+    appId: "1:701807318412:web:49f42e9f23b952a51b32a9"
   };
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-  firebase.analytics();
 </script>
 
 <script src="index.js"></script>
+<script id="MainScript">
+///-------------------VARIABLES---------------------/////
+  var ImageTitle,ImageUrl,ImageDescription;
+  var files = [];
+  var reader;
+  var today = new Date();
+
+
+///-------------------SELECT IMAGE---------------------/////
+    document.getElementById("select").onclick = function(e){
+
+      var input = document.createElement('input');
+      input.type = 'file';
+
+      
+
+      input.onchange = e =>{
+
+        files = e.target.files;
+        reader = new FileReader();
+        reader.onload = function(){
+
+          document.getElementById("myimg").src = reader.result;
+          
+        }
+        reader.readAsDataURL(files[0]);
+
+      }
+      input.click();
+    }
+
+    ///-------------------UPLOAD IMAGE---------------------///
+
+    document.getElementById("Upload").onclick = function(){
+
+      ImageTitle = document.getElementById("name").value;
+      ImageDescription = document.getElementById("description").value;
+    
+
+      var uploadTask = firebase.storage().ref('Images/'+ImageTitle+".png").put(files[0]);
+
+      uploadTask.on('state_changed',function(snapshots){
+
+          var progress = (snapshots.bytesTransfer/ snapshots.totalBytes)*100;
+          document.getElementById('upProgress').innerHTML = 'Uploading..'+progress+'%';
+        
+      }, function(error){
+        alert('error occured in saving the image')
+      },
+      
+      function(){
+
+        uploadTask.snapshot.ref.getDownloadURL().then(function(url){
+
+          ImageUrl = url;
+
+        });
+
+        if(ImageUrl = "" | ImageDescription =="" | ImageTitle=="" ){
+
+          window.alert("Nothing to be Uploaded");
+
+        }else{
+
+          db.collection("photos").doc().set({
+        Title: ImageTitle,
+        Description: ImageDescription,
+        Date: new Date(),
+        Image: ImageUrl,
+
+            })
+            .then(function() {
+            console.log("Document successfully written!");
+            window.alert("Photo uplaoded successfull")
+            })
+            .catch(function(error) {
+            console.error("Error writing document: ", error);
+            window.alert(error)
+            });
+
+
+        }
+    
+      }
+
+      )
+
+    }
+
+
+
+
+</script>
 
 </body>
 
